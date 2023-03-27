@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  
+  <script>
+    export default {
+      data() {
+        return {
+          newTask: '',
+          tasks: []
+        }
+      },
+      computed: {
+        incompleteTasks() {
+          return this.tasks.filter(task => !task.completed).length;
+        }
+      },
+      methods: {
+        addTask() {
+          if (this.newTask.trim() === '') return;
+          this.tasks.push({ text: this.newTask, completed: false });
+          this.newTask = '';
+        },
+        removeTask(index) {
+          this.tasks.splice(index, 1);
+        },
+        clearCompletedTasks() {
+          this.tasks = this.tasks.filter(task => !task.completed);
+        }
+      },
+      created() {
+        // Load tasks from local storage
+        const savedTasks = localStorage.getItem('tasks');
+        if (savedTasks) {
+          this.tasks = JSON.parse(savedTasks);
+        }
+      },
+      watch: {
+        // Save tasks to local storage when the tasks array changes
+        tasks: {
+          handler: function() {
+            localStorage.setItem('tasks', JSON.stringify(this.tasks));
+          },
+          deep: true
+        }
+      }
+    }
+    </script>
+    
+    <style>
+    .completed {
+      text-decoration: line-through;
+    }
+    </style>
+</head>
+<body>
+  <div>
+    <h1>To-Do List</h1>
+    <form @submit.prevent="addTask">
+      <input type="text" v-model="newTask" placeholder="Add a new task">
+      <button>Add</button>
+    </form>
+    <ul>
+      <li v-for="(task, index) in tasks" :key="index">
+        <input type="checkbox" v-model="task.completed">
+        <span :class="{ completed: task.completed }">{{ task.text }}</span>
+        <button @click="removeTask(index)">x</button>
+      </li>
+    </ul>
+    <p>{{ incompleteTasks }} tasks left to do</p>
+    <button @click="clearCompletedTasks">Clear completed tasks</button>
+  </div>
+</body>
+</html>
+
+
+
+
